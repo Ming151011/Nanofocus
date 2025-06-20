@@ -1,13 +1,56 @@
+
 Post_evaluation_history.npy 記錄優化過程的fom
 Post_x_array.npy 為最終優化為的結構
 Post_beta_scale_array.npy ,Post_cur_beta_array.npy , Post_eta_i_array.npy 為mapping會用到的參數
 
 -----------------------------------------------------------------------------------------------------
 
-DFT_GAS.ipynb 
+(1) DFT_GAS.ipynb 
 將優化完的結構量測其Ex,Ey,Ez的dft場，並根據不同的截面來方別存值
-dft_fields_xz ---> y=0 的 x-z截面
-dft_fields_yz ---> x=0 的 y-z截面
-這裡的simulation中的add_dft_fields裡的yee_grid=False來方便計算
+IN [2] 創立資料夾
+IN [3] 複製在Adjoint優化時的環境(EX. Mapping 函數)
+以下五個 add_dft_fields 結果會放進 DFT_GAS 資料夾中(DFT_GAS在 IN [2] 裡創裡)
+dft_fields_xz    ---> y=0.00 的 x-z 截面
+dft_fields_yz    ---> x=0.00 的 y-z 截面
+dft_fields_xyz12 ---> z=0.01 的 x-y 截面
+dft_fields_xyz00 ---> z=0.00 的 x-y 截面
+dft_fields_x0yz0 ---> 未使用，可忽略
+這裡的的add_dft_fields裡的 "yee_grid=False" 來方便計算
+
+(2) DFT_empty_GAS.ipynb
+其code架構完全與 DFT_GAS.ipynb 相同 ，只是將 geometry=[] 來取代原本的結構 ，用來方便計算放大倍率
+
+(3) DFT_GAS_post.ipynb
+將  DFT_GAS.ipynb 和 DFT_empty_GAS.ipynb 所得到的結果進行畫圖與分析
+
+(4) FOM_TEST.ipynb
+因fom畫出的趨勢圖與驗證的電場不同，故此檔案為驗證fom
+此驗證方式為將在Adjoint裡優化裡計算fom的攻式，帶入驗證檔裡，精確到小數點後7位，固可判定最終結果為正確。
+
+由 DFT_GAS_post.ipynb 畫出的電場圖，會與fom有差別的原因為 adjoint fom 的計算方式
+在取得 ET_x 與 ET_y 與 ET_z 時 ，我先將原本3維的 array 藉由取平方相加的方式 壓成了2維 array ，
+最後計算 Total field 時，再取 numpy.mean ，這樣等於少除了被壓縮納維的維度，因此成誤差。
+
+以下是 adjoint 的 fom 
+
+----------------------------------------------------------------------------------
+def J(fields_x,fields_y,fields_z):
+    ET_x = 0
+    ET_y = 0
+    ET_z = 0
+    ET_x_length = fields_x.shape[1]
+    ET_y_length = fields_y.shape[1]
+    ET_z_length = fields_z.shape[1]
+    for k in range(0,ET_x_length):
+        ET_x = ET_x + npa.abs(fields_x[:,k]) ** 2
+    for k in range(0,ET_y_length):
+        ET_y = ET_y + npa.abs(fields_y[:,k]) ** 2
+    for k in range(0,ET_z_length):
+        ET_z = ET_z + npa.abs(fields_z[:,k]) ** 2
+    ET = ( (npa.mean(ET_x)) + (npa.mean(ET_y)) + (npa.mean(ET_z)) ) ** (1/2)  
+    return ET
+------------------------------------------------------------------------------------
+
+
 
 
