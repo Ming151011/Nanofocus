@@ -1,1 +1,13 @@
-djnfjdknsflsdnfls
+Post_evaluation_history.npy 記錄優化過程的fom
+Post_x_array.npy 為最終優化為的結構
+Post_beta_scale_array.npy ,Post_cur_beta_array.npy , Post_eta_i_array.npy 為mapping會用到的參數
+
+-----------------------------------------------------------------------------------------------------
+
+DFT_GAS.ipynb 
+將優化完的結構量測其Ex,Ey,Ez的dft場，並根據不同的截面來方別存值
+dft_fields_xz ---> y=0 的 x-z截面
+dft_fields_yz ---> x=0 的 y-z截面
+這裡的simulation中的add_dft_fields裡的yee_grid=False來方便計算
+
+
